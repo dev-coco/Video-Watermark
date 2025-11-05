@@ -176,6 +176,8 @@ window.electronAPI.onFileCompleted((event, data) => {
       statusEl.textContent = '✓ 完成'
       statusEl.className = 'file-item-status completed'
     } else {
+      console.log('data', data)
+      console.log('event', event)
       statusEl.textContent = '✗ 失败'
       statusEl.className = 'file-item-status failed'
     }

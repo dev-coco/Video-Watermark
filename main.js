@@ -2,40 +2,27 @@ const { app, BrowserWindow, ipcMain, dialog } = require('electron')
 const path = require('path')
 const FFmpeg = require('fluent-ffmpeg')
 const ffmpegStatic = require('ffmpeg-static')
+const ffprobeStatic = require('ffprobe-static')
 const sharp = require('sharp')
 const fs = require('fs')
 const os = require('os')
 const { createCanvas, GlobalFonts } = require('@napi-rs/canvas')
 
-FFmpeg.setFfmpegPath(ffmpegStatic)
+FFmpeg.setFfmpegPath(ffmpegStatic.replace('app.asar', 'app.asar.unpacked'))
+FFmpeg.setFfprobePath(ffprobeStatic.path.replace('app.asar', 'app.asar.unpacked'))
+
+// const fontPath = path.join(__dirname, 'fonts', 'Arial Unicode.ttf')
+const fontPath = path.join(process.resourcesPath, 'app.asar.unpacked', 'fonts', 'Arial Unicode.ttf')
+GlobalFonts.registerFromPath(fontPath, 'ArialUnicode')
 
 let mainWindow
 const tempDirs = new Set()
 
 const CONFIG = {
   PADDING: { x: 10, y: 10 },
-  FONT_PATHS: {
-    darwin: ['/System/Library/Fonts/PingFang.ttc', '/System/Library/Fonts/Helvetica.ttc'],
-    win32: ['C:\\Windows\\Fonts\\msyh.ttc', 'C:\\Windows\\Fonts\\simhei.ttf'],
-    linux: ['/usr/share/fonts/truetype/noto/NotoSansCJK-Regular.ttc']
-  },
   BRIGHTNESS_THRESHOLD: 0.5,
   THUMBNAIL_SIZE: '640x360',
   VIDEO_EXTENSIONS: ['mp4', 'avi', 'mov', 'mkv', 'flv', 'wmv', 'webm']
-}
-
-// 注册系统字体
-function registerFonts () {
-  const fontPaths = CONFIG.FONT_PATHS[process.platform] || []
-  fontPaths.forEach(fontPath => {
-    if (fs.existsSync(fontPath)) {
-      try {
-        GlobalFonts.registerFromPath(fontPath)
-      } catch (err) {
-        console.warn(`字体注册失败 ${fontPath}`)
-      }
-    }
-  })
 }
 
 // 创建临时文件夹用于存放生成的临时文件
@@ -169,7 +156,7 @@ function generateWatermarkImage (text, fontSize, color, opacity, videoWidth, vid
 
   const tempCanvas = createCanvas(maxWidth, videoHeight)
   const tempCtx = tempCanvas.getContext('2d')
-  tempCtx.font = `${fontSize}px NotoSansCJK`
+  tempCtx.font = `${fontSize}px ArialUnicode`
 
   const lines = wrapText(text, tempCtx, maxWidth)
   const lineHeight = fontSize + 8
@@ -184,7 +171,7 @@ function generateWatermarkImage (text, fontSize, color, opacity, videoWidth, vid
   const canvas = createCanvas(canvasWidth, textHeight + 4)
   const ctx = canvas.getContext('2d')
 
-  ctx.font = `${fontSize}px NotoSansCJK`
+  ctx.font = `${fontSize}px ArialUnicode`
   ctx.textBaseline = 'top'
   ctx.textAlign = 'left'
 
@@ -318,7 +305,6 @@ function processVideoWithCanvasWatermark (inputPath, outputPath, watermarkBuffer
 
 // 创建主窗口并加载前端页面
 function createWindow () {
-  registerFonts()
   mainWindow = new BrowserWindow({
     width: 1020,
     height: 1085,

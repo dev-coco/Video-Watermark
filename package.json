@@ -6,7 +6,8 @@
   "main": "main.js",
   "scripts": {
     "start": "electron .",
-    "build": "electron-builder"
+    "build": "electron-builder",
+    "dist": "electron-builder --mac"
   },
   "build": {
     "appId": "com.Raz1ner.VideoWatermark",
@@ -16,6 +17,7 @@
         "dmg",
         "zip"
       ],
+      "identity": null,
       "icon": "build/icon.icns",
       "category": "public.app-category.utilities"
     },
@@ -25,11 +27,15 @@
         "zip"
       ],
       "icon": "build/icon.ico"
-    }
+    },
+    "asarUnpack": [
+      "fonts/**"
+    ]
   },
   "dependencies": {
     "@napi-rs/canvas": "^0.1.81",
     "ffmpeg-static": "latest",
+    "ffprobe-static": "^3.1.0",
     "fluent-ffmpeg": "latest",
     "sharp": "latest"
   },
